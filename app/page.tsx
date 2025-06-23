@@ -1,103 +1,191 @@
-import Image from "next/image";
+'use client';
+
+import { useState, useEffect } from 'react';
+import { BookmarksGrid } from '@/components/bookmarks-grid';
+import { bookmarksData } from '@/lib/bookmarks-data';
+import { BookmarkCategory, Bookmark } from '@/lib/types';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [mounted, setMounted] = useState(false);
+  const [categories, setCategories] = useState<BookmarkCategory[]>(bookmarksData);
+  const [editingBookmark, setEditingBookmark] = useState<{
+    categoryId: string;
+    bookmark: Bookmark;
+  } | null>(null);
+  const [editingCategory, setEditingCategory] = useState<BookmarkCategory | null>(null);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  
+  const [bookmarkForm, setBookmarkForm] = useState({
+    title: '',
+    url: ''
+  });
+  
+  const [categoryForm, setCategoryForm] = useState({
+    name: '',
+    bookmarks: ''
+  });
+
+  const handleEditBookmark = (categoryId: string, bookmark: Bookmark) => {
+    setEditingBookmark({ categoryId, bookmark });
+    setBookmarkForm({
+      title: bookmark.title,
+      url: bookmark.url
+    });
+  };
+
+  const handleEditCategory = (category: BookmarkCategory) => {
+    setEditingCategory(category);
+    setCategoryForm({
+      name: category.name,
+      bookmarks: category.bookmarks.map(b => `${b.title} | ${b.url}`).join('\n')
+    });
+  };
+
+  const saveBookmark = () => {
+    if (!editingBookmark) return;
+    
+    setCategories(prev => prev.map(category => {
+      if (category.id === editingBookmark.categoryId) {
+        return {
+          ...category,
+          bookmarks: category.bookmarks.map(bookmark =>
+            bookmark.id === editingBookmark.bookmark.id
+              ? { ...bookmark, title: bookmarkForm.title, url: bookmarkForm.url }
+              : bookmark
+          )
+        };
+      }
+      return category;
+    }));
+    
+    setEditingBookmark(null);
+    setBookmarkForm({ title: '', url: '' });
+  };
+
+  const saveCategory = () => {
+    if (!editingCategory) return;
+    
+    // Parse bookmarks from textarea
+    const bookmarkLines = categoryForm.bookmarks.split('\n').filter(line => line.trim());
+    const newBookmarks: Bookmark[] = bookmarkLines.map((line, index) => {
+      const parts = line.split(' | ');
+      const title = parts[0]?.trim() || `Bookmark ${index + 1}`;
+      const url = parts[1]?.trim() || 'https://example.com';
+      return {
+        id: `${editingCategory.id}-${index}`,
+        title,
+        url
+      };
+    });
+    
+    setCategories(prev => prev.map(category =>
+      category.id === editingCategory.id
+        ? { ...category, name: categoryForm.name, bookmarks: newBookmarks }
+        : category
+    ));
+    
+    setEditingCategory(null);
+    setCategoryForm({ name: '', bookmarks: '' });
+  };
+
+  if (!mounted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold mb-4">Bookmarks</h1>
+          <p className="text-muted-foreground">Loading...</p>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen">
+      <BookmarksGrid
+        categories={categories}
+        onEditBookmark={handleEditBookmark}
+        onEditCategory={handleEditCategory}
+      />
+
+      {/* Bookmark Edit Dialog */}
+      <Dialog open={!!editingBookmark} onOpenChange={() => setEditingBookmark(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Bookmark</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="title">Title</Label>
+              <Input
+                id="title"
+                value={bookmarkForm.title}
+                onChange={(e) => setBookmarkForm(prev => ({ ...prev, title: e.target.value }))}
+              />
+            </div>
+            <div>
+              <Label htmlFor="url">URL</Label>
+              <Input
+                id="url"
+                value={bookmarkForm.url}
+                onChange={(e) => setBookmarkForm(prev => ({ ...prev, url: e.target.value }))}
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setEditingBookmark(null)}>
+                Cancel
+              </Button>
+              <Button onClick={saveBookmark}>
+                Save
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Category Edit Dialog */}
+      <Dialog open={!!editingCategory} onOpenChange={() => setEditingCategory(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Edit Category</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="categoryName">Category Name</Label>
+              <Input
+                id="categoryName"
+                value={categoryForm.name}
+                onChange={(e) => setCategoryForm(prev => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+            <div>
+              <Label htmlFor="bookmarks">Bookmarks (one per line: Title | URL)</Label>
+              <Textarea
+                id="bookmarks"
+                value={categoryForm.bookmarks}
+                onChange={(e) => setCategoryForm(prev => ({ ...prev, bookmarks: e.target.value }))}
+                rows={10}
+                placeholder="GitHub | https://github.com&#10;Google | https://google.com"
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setEditingCategory(null)}>
+                Cancel
+              </Button>
+              <Button onClick={saveCategory}>
+                Save
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
