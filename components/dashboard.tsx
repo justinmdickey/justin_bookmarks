@@ -127,78 +127,74 @@ export function Dashboard() {
       // Geolocation not supported, use fallback
       fetchWeather();
     }
-  }, []);
+  }, [weather]);
 
   const getWeatherIcon = (condition: string, iconCode: string) => {
-    const iconClass = "h-6 w-6";
+    const baseClass = "h-6 w-6";
     
     // Use OpenWeather icon codes for more accurate mapping
     switch (iconCode.substring(0, 2)) {
       case '01': // clear sky
-        return <Sun className={iconClass} />;
+        return <Sun className={`${baseClass} text-yellow-500`} />;
       case '02': // few clouds
       case '03': // scattered clouds
       case '04': // broken clouds
-        return <Cloud className={iconClass} />;
+        return <Cloud className={`${baseClass} text-gray-500`} />;
       case '09': // shower rain
       case '10': // rain
-        return <CloudRain className={iconClass} />;
+        return <CloudRain className={`${baseClass} text-blue-500`} />;
       case '11': // thunderstorm
-        return <Zap className={iconClass} />;
+        return <Zap className={`${baseClass} text-purple-500`} />;
       case '13': // snow
-        return <CloudSnow className={iconClass} />;
+        return <CloudSnow className={`${baseClass} text-blue-200`} />;
       case '50': // mist/fog
-        return <CloudFog className={iconClass} />;
+        return <CloudFog className={`${baseClass} text-gray-400`} />;
       default:
-        return <Sun className={iconClass} />;
+        return <Sun className={`${baseClass} text-yellow-500`} />;
     }
   };
 
   return (
-    <div className="mb-6">
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between">
-            {/* Time Section */}
-            <div className="flex flex-col">
-              <div className="text-3xl font-bold font-mono">
-                {currentTime}
-              </div>
-              <div className="text-sm text-muted-foreground">
-                {new Date().toLocaleDateString('en-US', {
-                  weekday: 'long',
-                  month: 'long',
-                  day: 'numeric'
-                })}
-              </div>
+    <Card className="h-fit">
+      <CardContent className="p-4">
+        <div className="flex flex-col gap-4">
+          {/* Time Section */}
+          <div className="text-center">
+            <div className="text-3xl font-bold font-mono">
+              {currentTime}
             </div>
-
-            {/* Weather Section */}
-            <div className="flex items-center gap-4">
-              {loading ? (
-                <div className="text-muted-foreground">Loading weather...</div>
-              ) : weather ? (
-                <>
-                  <div className="flex items-center gap-2">
-                    {getWeatherIcon(weather.condition, weather.icon)}
-                    <div className="text-right">
-                      <div className="text-2xl font-bold">{weather.temp}°F</div>
-                      <div className="text-xs text-muted-foreground capitalize">
-                        {weather.description}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    {weather.location}
-                  </div>
-                </>
-              ) : (
-                <div className="text-muted-foreground">Weather unavailable</div>
-              )}
+            <div className="text-sm text-muted-foreground">
+              {new Date().toLocaleDateString('en-US', {
+                weekday: 'long',
+                month: 'long',
+                day: 'numeric'
+              })}
             </div>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+
+          {/* Weather Section */}
+          <div className="flex justify-center">
+            {loading ? (
+              <div className="text-muted-foreground">Loading weather...</div>
+            ) : weather ? (
+              <div className="flex flex-col items-center gap-2">
+                <div className="flex items-center gap-2">
+                  {getWeatherIcon(weather.condition, weather.icon)}
+                  <div className="text-2xl font-bold">{weather.temp}°F</div>
+                </div>
+                <div className="text-xs text-muted-foreground capitalize text-center">
+                  {weather.description}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {weather.location}
+                </div>
+              </div>
+            ) : (
+              <div className="text-muted-foreground">Weather unavailable</div>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

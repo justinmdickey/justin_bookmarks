@@ -100,7 +100,14 @@ export default function Home() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-4xl font-bold mb-4">Bookmarks</h1>
+          <div className="flex items-center gap-3 mb-4">
+            <img 
+              src="/android-chrome-512x512.png" 
+              alt="Bookmarks" 
+              className="h-10 w-10"
+            />
+            <h1 className="text-4xl font-bold">Bookmarks</h1>
+          </div>
           <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>

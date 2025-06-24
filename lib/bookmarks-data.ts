@@ -40,20 +40,6 @@ export const bookmarksData: BookmarkCategory[] = [
     ]
   },
   {
-    id: 'homelab',
-    name: 'Home Lab',
-    bookmarks: [
-      { id: 'proxmox', title: 'Proxmox', url: 'http://192.168.0.167:8006/' },
-      { id: 'homarr', title: 'Homarr', url: 'http://192.168.0.88:7575/' },
-      { id: 'plex', title: 'Plex', url: 'http://192.168.0.88:32400/' },
-      { id: 'erisdor-chat', title: 'Erisdor Chat', url: 'http://aichat.erisdor.com' },
-      { id: 'tortuga-hub', title: 'Tortuga Media Hub', url: 'https://tortugamediahub.com' },
-      { id: 'arch-wiki', title: 'Arch Wiki', url: 'https://wiki.archlinux.org/' },
-      { id: 'unixporn', title: 'r/unixp*rn', url: 'https://www.reddit.com/r/unixporn/' },
-      { id: 'hyprland-wiki', title: 'Hyprland Wiki', url: 'https://wiki.hyprland.org/' }
-    ]
-  },
-  {
     id: 'general',
     name: 'General',
     bookmarks: [
@@ -66,6 +52,20 @@ export const bookmarksData: BookmarkCategory[] = [
       { id: 'amazon', title: 'Amazon', url: 'https://smile.amazon.com' },
       { id: 'coffee', title: 'Coffee', url: 'https://www.mistobox.com/dashboard/' },
       { id: 'caliber', title: 'Caliber Home Loans', url: 'https://myaccount.caliberhomeloans.com/dashboard' }
+    ]
+  },
+  {
+    id: 'homelab',
+    name: 'Home Lab',
+    bookmarks: [
+      { id: 'proxmox', title: 'Proxmox', url: 'http://192.168.0.167:8006/' },
+      { id: 'homarr', title: 'Homarr', url: 'http://192.168.0.88:7575/' },
+      { id: 'plex', title: 'Plex', url: 'http://192.168.0.88:32400/' },
+      { id: 'erisdor-chat', title: 'Erisdor Chat', url: 'http://aichat.erisdor.com' },
+      { id: 'tortuga-hub', title: 'Tortuga Media Hub', url: 'https://tortugamediahub.com' },
+      { id: 'arch-wiki', title: 'Arch Wiki', url: 'https://wiki.archlinux.org/' },
+      { id: 'unixporn', title: 'r/unixp*rn', url: 'https://www.reddit.com/r/unixporn/' },
+      { id: 'hyprland-wiki', title: 'Hyprland Wiki', url: 'https://wiki.hyprland.org/' }
     ]
   }
 ];

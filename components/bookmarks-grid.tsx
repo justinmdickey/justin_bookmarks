@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { BookmarkCategory, Bookmark } from '@/lib/types';
-import { Edit2, Search, Settings, Briefcase, Shield, Home, Globe, Link2, LogOut } from 'lucide-react';
+import { Edit2, Search, Settings, Briefcase, Shield, Home, Globe, LogOut } from 'lucide-react';
 import { Dashboard } from './dashboard';
 import { useState } from 'react';
 
@@ -38,29 +38,43 @@ export function BookmarksGrid({ categories, onEditBookmark, onEditCategory }: Bo
     }
   };
 
-  const getFaviconUrl = (url: string) => {
-    try {
-      const domain = new URL(url).hostname;
-      return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
-    } catch {
-      return null;
-    }
-  };
-
   const BookmarkIcon = ({ url }: { url: string }) => {
-    const [faviconError, setFaviconError] = useState(false);
-    const faviconUrl = getFaviconUrl(url);
+    const [useAppIcon, setUseAppIcon] = useState(false);
 
-    if (!faviconUrl || faviconError) {
-      return <Link2 className="h-4 w-4 flex-shrink-0 text-muted-foreground" />;
+    const getFaviconUrl = (siteUrl: string) => {
+      try {
+        const domain = new URL(siteUrl).hostname;
+        return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
+      } catch {
+        return "/android-chrome-192x192.png";
+      }
+    };
+
+    const handleLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+      const img = e.currentTarget;
+      // Check if the loaded image is the default globe (very small file size)
+      if (img.naturalWidth === 16 && img.naturalHeight === 16) {
+        setUseAppIcon(true);
+      }
+    };
+
+    if (useAppIcon) {
+      return (
+        <img
+          src="/android-chrome-192x192.png"
+          alt=""
+          className="h-4 w-4 flex-shrink-0"
+        />
+      );
     }
 
     return (
       <img
-        src={faviconUrl}
+        src={getFaviconUrl(url)}
         alt=""
         className="h-4 w-4 flex-shrink-0"
-        onError={() => setFaviconError(true)}
+        onLoad={handleLoad}
+        onError={() => setUseAppIcon(true)}
       />
     );
   };
@@ -75,10 +89,16 @@ export function BookmarksGrid({ categories, onEditBookmark, onEditCategory }: Bo
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      <Dashboard />
       <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-4xl font-bold">Bookmarks</h1>
+        <div className="flex items-center justify-between mb-4 bg-gradient-to-r from-blue-600 to-blue-800 text-white px-6 py-4 rounded-lg shadow-lg">
+          <div className="flex items-center gap-3">
+            <img 
+              src="/android-chrome-512x512.png" 
+              alt="Bookmarks" 
+              className="h-10 w-10"
+            />
+            <h1 className="text-4xl font-bold">Bookmarks</h1>
+          </div>
           <div className="flex items-center gap-2">
             <Button
               variant={editMode ? "default" : "outline"}
@@ -100,20 +120,26 @@ export function BookmarksGrid({ categories, onEditBookmark, onEditCategory }: Bo
             </Button>
           </div>
         </div>
-        <div className="relative">
-          <Search className="absolute left-3 top-4 h-5 w-5 text-muted-foreground" />
+      </div>
+      <div className="mb-6 flex justify-center">
+        <div className="relative w-96">
+          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search bookmarks..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 text-base h-12"
+            className="pl-10 text-sm h-10"
+            autoFocus
           />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4">
+        <div className="break-inside-avoid mb-4">
+          <Dashboard />
+        </div>
         {filteredCategories.map((category) => (
-          <Card key={category.id} className="h-fit">
+          <Card key={category.id} className="h-fit break-inside-avoid mb-4">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
