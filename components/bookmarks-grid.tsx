@@ -6,7 +6,8 @@ import { Input } from '@/components/ui/input';
 import { BookmarkCategory, Bookmark } from '@/lib/types';
 import { Edit2, Search, Settings, Briefcase, Shield, Home, Globe, LogOut } from 'lucide-react';
 import { Dashboard } from './dashboard';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { isAuthenticated } from '@/lib/auth';
 
 interface BookmarksGridProps {
   categories: BookmarkCategory[];
@@ -17,9 +18,34 @@ interface BookmarksGridProps {
 export function BookmarksGrid({ categories, onEditBookmark, onEditCategory }: BookmarksGridProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [editMode, setEditMode] = useState(false);
+  const [userAuthenticated, setUserAuthenticated] = useState(false);
+
+  useEffect(() => {
+    setUserAuthenticated(isAuthenticated());
+    
+    // Listen for authentication changes (e.g., when user logs in)
+    const handleAuthChange = () => {
+      setUserAuthenticated(isAuthenticated());
+    };
+    
+    // Check authentication status when the page becomes visible
+    document.addEventListener('visibilitychange', handleAuthChange);
+    window.addEventListener('focus', handleAuthChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleAuthChange);
+      window.removeEventListener('focus', handleAuthChange);
+    };
+  }, []);
 
   const handleLogout = () => {
     document.cookie = 'auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    setUserAuthenticated(false);
+    setEditMode(false);
+    window.location.href = '/';
+  };
+
+  const handleLogin = () => {
     window.location.href = '/login';
   };
 
@@ -52,8 +78,8 @@ export function BookmarksGrid({ categories, onEditBookmark, onEditCategory }: Bo
 
     const handleLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
       const img = e.currentTarget;
-      // Check if the loaded image is the default globe (very small file size)
-      if (img.naturalWidth === 16 && img.naturalHeight === 16) {
+      // Check if the loaded image is Google's default globe (16x16 or very small)
+      if (img.naturalWidth <= 16 && img.naturalHeight <= 16) {
         setUseAppIcon(true);
       }
     };
@@ -90,34 +116,50 @@ export function BookmarksGrid({ categories, onEditBookmark, onEditCategory }: Bo
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="mb-6">
-        <div className="flex items-center justify-between mb-4 bg-gradient-to-r from-blue-600 to-blue-800 text-white px-6 py-4 rounded-lg shadow-lg">
-          <div className="flex items-center gap-3">
-            <img 
-              src="/android-chrome-512x512.png" 
-              alt="Bookmarks" 
-              className="h-10 w-10"
-            />
-            <h1 className="text-4xl font-bold">Bookmarks</h1>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant={editMode ? "default" : "outline"}
-              size="sm"
-              onClick={() => setEditMode(!editMode)}
-              className="flex items-center gap-2"
-            >
-              <Settings className="h-4 w-4" />
-              {editMode ? 'Done' : 'Edit'}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleLogout}
-              className="flex items-center gap-2"
-            >
-              <LogOut className="h-4 w-4" />
-              Logout
-            </Button>
+        <div className="mb-4 bg-gradient-to-r from-blue-600 to-blue-800 text-white px-6 py-4 rounded-lg shadow-lg">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <img 
+                src="/android-chrome-512x512.png" 
+                alt="Bookmarks" 
+                className="h-10 w-10"
+              />
+              <h1 className="text-4xl font-bold">Bookmarks</h1>
+            </div>
+            <div className="flex items-center gap-2">
+              {userAuthenticated ? (
+                <>
+                  <Button
+                    variant={editMode ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setEditMode(!editMode)}
+                    className="flex items-center gap-2"
+                  >
+                    <Settings className="h-4 w-4" />
+                    {editMode ? 'Done' : 'Edit'}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleLogout}
+                    className="flex items-center gap-2"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Logout
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleLogin}
+                  className="flex items-center gap-2"
+                >
+                  <Settings className="h-4 w-4" />
+                  Login to Edit
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -146,7 +188,7 @@ export function BookmarksGrid({ categories, onEditBookmark, onEditCategory }: Bo
                   {getCategoryIcon(category.id)}
                   <CardTitle className="text-xl font-semibold">{category.name}</CardTitle>
                 </div>
-                {onEditCategory && editMode && (
+                {onEditCategory && userAuthenticated && editMode && (
                   <Button
                     variant="ghost"
                     size="sm"
@@ -171,7 +213,7 @@ export function BookmarksGrid({ categories, onEditBookmark, onEditCategory }: Bo
                       <BookmarkIcon url={bookmark.url} />
                       <span className="truncate">{bookmark.title}</span>
                     </a>
-                    {onEditBookmark && editMode && (
+                    {onEditBookmark && userAuthenticated && editMode && (
                       <Button
                         variant="ghost"
                         size="sm"
