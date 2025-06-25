@@ -1,6 +1,35 @@
 import type { Metadata } from "next";
 import { JetBrains_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
+
+const mapleMono = localFont({
+  src: [
+    {
+      path: "./fonts/MapleMono-Regular.ttf",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "./fonts/MapleMono-Medium.ttf", 
+      weight: "500",
+      style: "normal",
+    },
+    {
+      path: "./fonts/MapleMono-SemiBold.ttf",
+      weight: "600", 
+      style: "normal",
+    },
+    {
+      path: "./fonts/MapleMono-Bold.ttf",
+      weight: "700",
+      style: "normal",
+    },
+  ],
+  variable: "--font-maple-mono",
+  display: "swap",
+  fallback: ["JetBrains Mono", "monospace"],
+});
 
 const jetbrainsMono = JetBrains_Mono({
   variable: "--font-jetbrains-mono",
@@ -31,7 +60,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className={`${jetbrainsMono.variable} font-mono antialiased bg-background text-foreground`}
+        className={`${mapleMono.variable} ${jetbrainsMono.variable} font-mono antialiased bg-background text-foreground`}
       >
         {children}
       </body>
