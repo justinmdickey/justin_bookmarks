@@ -54,18 +54,13 @@ export function Dashboard() {
 
   // Fetch weather data
   useEffect(() => {
-    const fetchWeather = async (lat?: number, lon?: number) => {
+    const fetchWeather = async () => {
       try {
         // You'll need to set your OpenWeather API key as an environment variable
         const API_KEY = process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY;
         
-        let url = '';
-        if (lat && lon) {
-          url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=imperial`;
-        } else {
-          // Fallback to Greenfield, IN
-          url = `https://api.openweathermap.org/data/2.5/weather?q=Greenfield,IN,US&appid=${API_KEY}&units=imperial`;
-        }
+        // Use Indianapolis, IN
+        const url = `https://api.openweathermap.org/data/2.5/weather?q=Indianapolis,IN,US&appid=${API_KEY}&units=imperial`;
 
         const response = await fetch(url);
         if (!response.ok) throw new Error('Weather API failed');
@@ -99,7 +94,7 @@ export function Dashboard() {
             condition: 'Clear',
             description: 'clear sky',
             icon: '01d',
-            location: 'Greenfield'
+            location: 'Indianapolis'
           };
           setWeather(fallbackWeather);
           
@@ -112,21 +107,7 @@ export function Dashboard() {
       }
     };
 
-    // Try to get user location first
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          fetchWeather(position.coords.latitude, position.coords.longitude);
-        },
-        () => {
-          // Geolocation failed, use fallback
-          fetchWeather();
-        }
-      );
-    } else {
-      // Geolocation not supported, use fallback
-      fetchWeather();
-    }
+    fetchWeather();
   }, [weather]);
 
   const getWeatherIcon = (condition: string, iconCode: string) => {

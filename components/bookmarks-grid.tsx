@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { BookmarkCategory, Bookmark } from '@/lib/types';
 import { Edit2, Search, Settings, Briefcase, Shield, Home, Globe, LogOut } from 'lucide-react';
 import { Dashboard } from './dashboard';
+import { ThemeToggle } from './theme-toggle';
 import { useState, useEffect } from 'react';
 import { isAuthenticated } from '@/lib/auth';
 
@@ -116,7 +117,7 @@ export function BookmarksGrid({ categories, onEditBookmark, onEditCategory }: Bo
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="mb-6">
-        <div className="mb-4 bg-gradient-to-r from-blue-600 to-blue-800 text-white px-6 py-4 rounded-lg shadow-lg">
+        <div className="mb-4 bg-gradient-to-r from-[#57a5e5] to-[#4a90d9] text-white px-6 py-4 rounded-lg shadow-lg">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-3">
               <img 
@@ -127,13 +128,14 @@ export function BookmarksGrid({ categories, onEditBookmark, onEditCategory }: Bo
               <h1 className="text-4xl font-bold">Bookmarks</h1>
             </div>
             <div className="flex items-center gap-2">
+              <ThemeToggle />
               {userAuthenticated ? (
                 <>
                   <Button
-                    variant={editMode ? "default" : "outline"}
+                    variant={editMode ? "secondary" : "outline"}
                     size="sm"
                     onClick={() => setEditMode(!editMode)}
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-2 text-[#101012] dark:text-white border-white/50 hover:bg-white/10 hover:border-white"
                   >
                     <Settings className="h-4 w-4" />
                     {editMode ? 'Done' : 'Edit'}
@@ -142,7 +144,7 @@ export function BookmarksGrid({ categories, onEditBookmark, onEditCategory }: Bo
                     variant="ghost"
                     size="sm"
                     onClick={handleLogout}
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-2 text-[#101012] dark:text-white hover:bg-white/10"
                   >
                     <LogOut className="h-4 w-4" />
                     Logout
@@ -153,7 +155,7 @@ export function BookmarksGrid({ categories, onEditBookmark, onEditCategory }: Bo
                   variant="outline"
                   size="sm"
                   onClick={handleLogin}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 text-[#101012] dark:text-white border-white/50 hover:bg-white/10 hover:border-white"
                 >
                   <Settings className="h-4 w-4" />
                   Login to Edit
