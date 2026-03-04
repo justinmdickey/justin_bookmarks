@@ -7,8 +7,13 @@ services:
       - NODE_ENV=production
       - NEXT_PUBLIC_OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY}
       - AUTH_PASSWORD=${AUTH_PASSWORD}
+    volumes:
+      - bookmarks_data:/app/data
     restart: unless-stopped
     container_name: justin_bookmarks
+
+volumes:
+  bookmarks_data:
 
   # Optional: Add nginx reverse proxy for SSL/domain routing
   # nginx:

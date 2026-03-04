@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useSyncExternalStore } from 'react';
 import { BookmarksGrid } from '@/components/bookmarks-grid';
-import { bookmarksData } from '@/lib/bookmarks-data';
 import { BookmarkCategory, Bookmark } from '@/lib/types';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -11,27 +10,34 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 
 export default function Home() {
-  const [mounted, setMounted] = useState(false);
-  const [categories, setCategories] = useState<BookmarkCategory[]>(bookmarksData);
+  const mounted = useSyncExternalStore(() => () => {}, () => true, () => false);
+  const [categories, setCategories] = useState<BookmarkCategory[]>([]);
   const [editingBookmark, setEditingBookmark] = useState<{
     categoryId: string;
     bookmark: Bookmark;
   } | null>(null);
   const [editingCategory, setEditingCategory] = useState<BookmarkCategory | null>(null);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-  
   const [bookmarkForm, setBookmarkForm] = useState({
     title: '',
     url: ''
   });
-  
+
   const [categoryForm, setCategoryForm] = useState({
     name: '',
     bookmarks: ''
   });
+
+  const fetchCategories = useCallback(async () => {
+    const res = await fetch('/api/bookmarks');
+    if (res.ok) {
+      setCategories(await res.json());
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
 
   const handleEditBookmark = (categoryId: string, bookmark: Bookmark) => {
     setEditingBookmark({ categoryId, bookmark });
@@ -49,31 +55,29 @@ export default function Home() {
     });
   };
 
-  const saveBookmark = () => {
+  const saveBookmark = async () => {
     if (!editingBookmark) return;
-    
-    setCategories(prev => prev.map(category => {
-      if (category.id === editingBookmark.categoryId) {
-        return {
-          ...category,
-          bookmarks: category.bookmarks.map(bookmark =>
-            bookmark.id === editingBookmark.bookmark.id
-              ? { ...bookmark, title: bookmarkForm.title, url: bookmarkForm.url }
-              : bookmark
-          )
-        };
+
+    const res = await fetch(
+      `/api/bookmarks/${editingBookmark.categoryId}/items/${editingBookmark.bookmark.id}`,
+      {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: bookmarkForm.title, url: bookmarkForm.url }),
       }
-      return category;
-    }));
-    
+    );
+
+    if (res.ok) {
+      await fetchCategories();
+    }
+
     setEditingBookmark(null);
     setBookmarkForm({ title: '', url: '' });
   };
 
-  const saveCategory = () => {
+  const saveCategory = async () => {
     if (!editingCategory) return;
-    
-    // Parse bookmarks from textarea
+
     const bookmarkLines = categoryForm.bookmarks.split('\n').filter(line => line.trim());
     const newBookmarks: Bookmark[] = bookmarkLines.map((line, index) => {
       const parts = line.split(' | ');
@@ -85,13 +89,17 @@ export default function Home() {
         url
       };
     });
-    
-    setCategories(prev => prev.map(category =>
-      category.id === editingCategory.id
-        ? { ...category, name: categoryForm.name, bookmarks: newBookmarks }
-        : category
-    ));
-    
+
+    const res = await fetch(`/api/bookmarks/${editingCategory.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: categoryForm.name, bookmarks: newBookmarks }),
+    });
+
+    if (res.ok) {
+      await fetchCategories();
+    }
+
     setEditingCategory(null);
     setCategoryForm({ name: '', bookmarks: '' });
   };
@@ -101,9 +109,9 @@ export default function Home() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="flex items-center gap-3 mb-4">
-            <img 
-              src="/android-chrome-512x512.png" 
-              alt="Bookmarks" 
+            <img
+              src="/android-chrome-512x512.png"
+              alt="Bookmarks"
               className="h-10 w-10"
             />
             <h1 className="text-4xl font-bold">Bookmarks</h1>

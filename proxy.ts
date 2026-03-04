@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   // Skip auth check for login page, API routes, and main bookmarks page
   if (request.nextUrl.pathname === '/login' || 
       request.nextUrl.pathname.startsWith('/api/') ||

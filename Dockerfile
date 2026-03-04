@@ -47,6 +47,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 # Copy public folder for static assets (required for standalone mode)
 COPY --from=builder /app/public ./public
 
+# Create data directory for persistent bookmarks storage
+RUN mkdir -p data && chown nextjs:nodejs data
+
 USER nextjs
 
 EXPOSE 3000
