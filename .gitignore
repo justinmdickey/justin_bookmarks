@@ -36,6 +36,9 @@ yarn-error.log*
 # bookmarks data
 data/bookmarks.json
 
+# server-specific docker overrides
+docker-compose.override.yml
+
 # vercel
 .vercel
 
